@@ -1,11 +1,11 @@
-import { elm, frag, Signal, useRef, useSignal } from "@amodx/elm";
+import { elm, frag, useRef } from "@amodx/elm";
 import { IntProp, Schema, SelectProp } from "@amodx/schemas";
 import { SchemaRegister } from "@divinevoxel/vlox/Voxels/State/SchemaRegister";
 import { SchemaEditor } from "../../../UI/Schemas/SchemaEditor";
 import { VoxelIndex } from "@divinevoxel/vlox/Voxels/Indexes/VoxelIndex";
 import { VoxelTextureIndex } from "@divinevoxel/vlox/Voxels/Indexes/VoxelTextureIndex";
 import { Observable } from "@amodx/core/Observers";
-import { BuilderState } from "../BuilderState";
+import { Builder } from "../Builder";
 
 elm.css(/* css */ `
 
@@ -64,14 +64,14 @@ elm.css(/* css */ `
 
 const schemaUpdated = new Observable();
 
-function SchemaForm(voxelId: string) {
-  const paintData = BuilderState.paintData;
+function SchemaForm(voxelId: string, builder: Builder) {
+  const paintData = builder.paintData;
   const voxelSchema = SchemaRegister.getVoxelSchemas(voxelId);
   voxelSchema.state.startEncoding();
   voxelSchema.mod.startEncoding();
   const updated = () => {
-    paintData.schema.state = voxelSchema.state.getEncoded();
-    paintData.schema.mod = voxelSchema.mod.getEncoded();
+    paintData.state = voxelSchema.state.getEncoded();
+    paintData.mod = voxelSchema.mod.getEncoded();
     schemaUpdated.notify();
   };
 
@@ -140,8 +140,8 @@ function SchemaForm(voxelId: string) {
     : null;
 
   const loadIn = () => {
-    voxelSchema.state.startEncoding(paintData.schema.state);
-    voxelSchema.mod.startEncoding(paintData.schema.mod);
+    voxelSchema.state.startEncoding(paintData.state);
+    voxelSchema.mod.startEncoding(paintData.mod);
     if (shapeStateSchema) {
       voxelSchema.state.nodes.forEach((node) => {
         if (node.valuePalette) {
@@ -162,7 +162,7 @@ function SchemaForm(voxelId: string) {
     }
   };
 
-  BuilderState.voxelUpdated.subscribe(SchemaForm, () => {
+  builder.addEventListener("voxel-updated", () => {
     loadIn();
   });
 
@@ -179,19 +179,17 @@ function SchemaForm(voxelId: string) {
       null
   );
 }
-export default function VoxelDisplay() {
+export default function VoxelDisplay({ builder }: { builder: Builder }) {
   const imageRef = useRef<HTMLImageElement>();
   const schameRef = useRef<HTMLDivElement>();
   const titleRef = useRef<HTMLHeadingElement>();
 
   const updateVoxel = () => {
     schameRef.current!.innerHTML = "";
-    schameRef.current!.append(SchemaForm(BuilderState.paintData.schema.id));
+    schameRef.current!.append(SchemaForm(builder.paintData.id, builder));
   };
   const updateDisplay = () => {
-    const state = VoxelIndex.instance.getStateFromPaintData(
-      BuilderState.paintData.schema
-    );
+    const state = VoxelIndex.instance.getStateFromPaintData(builder.paintData);
     if (!state) {
       imageRef.current!.src = "";
       return;
@@ -211,9 +209,9 @@ export default function VoxelDisplay() {
     updateDisplay();
   });
 
-  BuilderState.voxelUpdated.subscribe(() => {
-    if (BuilderState.paintData.schema.id != voxelId) {
-      voxelId = BuilderState.paintData.schema.id;
+  builder.addEventListener("voxel-updated", () => {
+    if (builder.paintData.id != voxelId) {
+      voxelId = builder.paintData.id;
       updateVoxel();
     }
     updateDisplay();

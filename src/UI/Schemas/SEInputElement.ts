@@ -18,7 +18,7 @@ export class SchemaEditorNodeObservers {
 
 export type SEInputBaseProps<
   Value = any,
-  Input extends PropertyInputBase = any,
+  Input extends PropertyInputBase = any
 > = {
   schema: SchemaEditorObservers;
   observers: SchemaEditorNodeObservers;
@@ -26,10 +26,10 @@ export type SEInputBaseProps<
 
 export type SEProps<
   Value = any,
-  Input extends PropertyInputBase = any,
+  Input extends PropertyInputBase = any
 > = PropertyRenderFCDefaultProps<Value, Input> & SEInputBaseProps;
 
 export type SEInputElement<
   Value = any,
-  Input extends PropertyInputBase = any,
+  Input extends PropertyInputBase = any
 > = PropertyRenderFC<ElementChildren, Value, Input, SEInputBaseProps>;

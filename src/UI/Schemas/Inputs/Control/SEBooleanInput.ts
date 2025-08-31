@@ -1,10 +1,14 @@
 import { BooleanPropertyInput } from "@amodx/schemas";
 import { SchemaEditorInputRegister } from "../../SchemaEditorInputRegister";
 import { SEInputBase } from "../../SEInputBase";
-import { elm, useSignal } from "@amodx/elm";
+import { SEInputBaseProps } from "../../SEInputElement";
+import { elm, useSignal, ElementChildren } from "@amodx/elm";
 SchemaEditorInputRegister.register(
   BooleanPropertyInput,
-  BooleanPropertyInput.createPropertyRenderFC((props) => {
+  BooleanPropertyInput.createPropertyRenderFC<
+    ElementChildren,
+    SEInputBaseProps
+  >((props) => {
     const { node } = props;
     const updateInput = useSignal();
     node.observers.updatedOrLoadedIn.subscribe(() => updateInput.broadcast());

@@ -1,17 +1,19 @@
-import { elm, frag, useSignal } from "@amodx/elm";
+import { elm } from "@amodx/elm";
 import VoxelDisplay from "./Components/VoxelDisplay";
 import VoxelSelect from "./Components/Select/VoxelSelect";
 import { ToolPanelViews } from "../../ToolPanelViews";
-import { Graph, Node } from "@amodx/ncs/";
-import { VoxelInersectionComponent } from "@dvegames/vlox/Interaction/VoxelIntersection.component";
-import { VoxelMousePickComponent } from "@dvegames/vlox/Interaction/VoxelMousePick.component";
-import { VoxelUpdateProviderComponent } from "@dvegames/vlox/Providers/VoxelUpdateProvider.component";
-import { MouseVoxelBuilderComponent } from "@dvegames/vlox/Building/MouseVoxelBuilder.component";
-import { VoxelPaintDataComponent } from "@dvegames/vlox/Voxels/VoxelPaintData.component";
-import { DimensionProviderComponent } from "@dvegames/vlox/Providers/DimensionProvider.component";
-import { BuilderState } from "./BuilderState";
+import { Graph } from "@amodx/ncs/";
 import { SchemaEditor } from "../../UI/Schemas/SchemaEditor";
-import { MouseVoxelBuilderBoxToolComponent } from "@dvegames/vlox/Building/Mouse/MouseVoxelBuilderBoxTool.component";
+import { Schema, SelectProp } from "@amodx/schemas";
+import { Builder, BuilderToolIds } from "./Builder";
+import { BabylonContext } from "@dvegames/vlox/Babylon/Babylon.context";
+import { RendererContext } from "@dvegames/vlox/Contexts/Renderer.context";
+import HandTool from "./Tools/HandTool";
+import BrushTool from "./Tools/BrushTool/index";
+import BoxTool from "./Tools/BoxTool";
+import WandTool from "./Tools/WandTool";
+import PathTool from "./Tools/PathTool";
+import WrenchTool from "./Tools/WrenchTool";
 
 elm.css(/* css */ `
 .builder {
@@ -28,52 +30,57 @@ elm.css(/* css */ `
 }
   `);
 export default function (graph: Graph) {
-  const node = graph
-    .addNode(
-      Node("Builder", [
-        VoxelInersectionComponent(),
-        VoxelMousePickComponent(),
-        VoxelUpdateProviderComponent(),
-        VoxelPaintDataComponent(),
-        DimensionProviderComponent(),
-      ])
-    )
-    .cloneCursor();
-  MouseVoxelBuilderComponent.set(node);
-  const mouseBuilder = MouseVoxelBuilderComponent.get(node)!;
-  mouseBuilder.data.voxelPickedObserver.subscribe(() => {
-    BuilderState.voxelUpdated.notify();
+  const rendererContext = RendererContext.getRequired(graph.root);
+  const { scene } = BabylonContext.getRequired(graph.root).data;
+
+  const builder = new Builder(rendererContext.data.dve, scene);
+
+  scene.registerBeforeRender(() => {
+    builder;
   });
 
-  BuilderState.paintData = VoxelPaintDataComponent.getRequired(node);
-  ToolPanelViews.registerView("Build", (component) => {
-    const updated = useSignal();
-
+  ToolPanelViews.registerView("Build", () => {
     return elm(
       "div",
       {
         className: "builder",
+        hooks: {
+          afterRender() {
+            builder.setTool(BuilderToolIds.Hand);
+          },
+        },
       },
-      frag(
-        SchemaEditor({
-          schema: mouseBuilder!.schema,
-        }),
-        elm("div", {
-          signal: updated((elm) => {
-            elm.innerHTML = "";
-            if (MouseVoxelBuilderBoxToolComponent.get(node)) {
-              elm.append(
-                SchemaEditor({
-                  schema: MouseVoxelBuilderBoxToolComponent.get(node)!.schema,
-                })
-              );
-            }
-          }),
-        })
+      SchemaEditor({
+        schemaInstance: Schema.CreateInstance(
+          SelectProp("tool", {
+            options: [
+              BuilderToolIds.Hand,
+              BuilderToolIds.Box,
+              BuilderToolIds.Brush,
+              BuilderToolIds.Wand,
+              BuilderToolIds.Path,
+              BuilderToolIds.Wrench,
+            ],
+            initialize: (node) =>
+              node.observers.updatedOrLoadedIn.subscribe(() =>
+                builder.setTool(node.get())
+              ),
+          })
+        ),
+      }),
+      elm(
+        "div",
+        {},
+        HandTool({ builder }),
+        WandTool({ builder }),
+        BoxTool({ builder }),
+        BrushTool({ builder }),
+        PathTool({ builder }),
+        WrenchTool({ builder })
       ),
       elm("hr"),
-      VoxelDisplay(),
-      VoxelSelect()
+      VoxelDisplay({ builder }),
+      VoxelSelect({ builder })
     );
   });
 }

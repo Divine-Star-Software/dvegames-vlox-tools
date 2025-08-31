@@ -2,7 +2,7 @@ import { Color3PropertyInput } from "@amodx/schemas";
 import { SchemaEditorInputRegister } from "../../SchemaEditorInputRegister";
 import { SEInputBase } from "../../SEInputBase";
 import { ElementChildren, elm, useSignal } from "@amodx/elm";
-import { SEInputBaseProps } from "UI/Schemas/SEInputElement";
+import { SEInputBaseProps } from "../../SEInputElement";
 import { convertRGBToHex, convertHexToRGB                                                                                                     } from "./Functions";
 SchemaEditorInputRegister.register(
   Color3PropertyInput,

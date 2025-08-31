@@ -3,6 +3,7 @@ import { VoxelIndex } from "@divinevoxel/vlox/Voxels/Indexes/VoxelIndex";
 import ItemNode from "./ItemNode";
 import ItemGroup from "./ItemGroup";
 import ItemSearch from "./ItemSearch";
+import { Builder } from "../../Builder";
 
 elm.css(/* css */ `
 .voxel-select {
@@ -79,7 +80,7 @@ elm.css(/* css */ `
 
 `);
 
-export default function VoxelSelect() {
+export default function VoxelSelect({ builder }: { builder: Builder }) {
   return elm(
     "div",
     { className: "voxel-select" },
@@ -91,11 +92,13 @@ export default function VoxelSelect() {
         if (state.stateArray.length > 1) {
           return ItemGroup({
             state,
+            builder,
           });
         }
 
         return ItemNode({
           state: state.stateArray[0],
+          builder,
         });
       })
     )

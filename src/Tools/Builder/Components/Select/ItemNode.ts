@@ -4,8 +4,8 @@ import { VoxelTextureIndex } from "@divinevoxel/vlox/Voxels/Indexes/VoxelTexture
 import { ItemSearchManager } from "./ItemSearchManager";
 import { FuzzySearch } from "@amodx/core/Search/FuzzySearch";
 import { Observable } from "@amodx/core/Observers";
+import { Builder } from "../../Builder";
 
-import { BuilderState } from "../../BuilderState";
 const temp: string[] = [];
 const included = (state: VoxelNamedState, searchStrings: string[][]) => {
   if (ItemSearchManager.search == "" && ItemSearchManager.filters.length == 0)
@@ -50,10 +50,12 @@ export default function ItemNode({
   state,
   enabledObserver,
   isGroup,
+  builder,
 }: {
   state: VoxelNamedState;
   isGroup?: boolean;
   enabledObserver?: Observable<boolean>;
+  builder: Builder;
 }) {
   const image = VoxelTextureIndex.getImage(state.voxelId, state.data.id);
 
@@ -112,7 +114,7 @@ export default function ItemNode({
       onclick() {
         console.warn("CLICKED", state, state.getPaintData());
         const paintData = state.getPaintData();
-        BuilderState.setData(paintData);
+        builder.setData(paintData);
       },
     },
     image &&

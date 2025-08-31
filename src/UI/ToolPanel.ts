@@ -56,6 +56,25 @@ elm.css(/* css */ `
 .input option {
   color:black;
 }
+   .button {
+      padding: 5px;
+      background-color: #232323;
+      border: 1px solid var(--primary);
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: none;
+      color: white;
+      transition: .15s;
+      &:hover {
+        transition: .15s;
+        background-color: #606060;
+        cursor: pointer;
+      }
+    }
     .input {
     padding: 0;
     margin: 0;

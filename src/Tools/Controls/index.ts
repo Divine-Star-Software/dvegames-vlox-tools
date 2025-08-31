@@ -2,7 +2,7 @@ import { frag } from "@amodx/elm";
 import { ToolPanelViews } from "../../ToolPanelViews";
 import { BooleanProp, Schema } from "@amodx/schemas";
 import { SchemaEditor } from "../../UI/Schemas/SchemaEditor";
-import { Graph, Node, } from "@amodx/ncs/";
+import { Graph, Node } from "@amodx/ncs/";
 import { BabylonContext } from "@dvegames/vlox/Babylon/Babylon.context";
 import { CrossHairsComponent } from "@dvegames/vlox/Babylon/Interaction/CrossHairs.component";
 
@@ -15,7 +15,9 @@ export default function (graph: Graph) {
   const setPointerLock = (locked: boolean) => {
     if (locked) {
       listener = () => {
-        canvas.requestPointerLock();
+        canvas.requestPointerLock({
+          unadjustedMovement: true,
+        });
       };
       canvas.addEventListener("click", listener);
     } else {

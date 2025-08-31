@@ -7,6 +7,7 @@ import { VoxelTextureIndex } from "@divinevoxel/vlox/Voxels/Indexes/VoxelTexture
 import { ItemSearchManager } from "./ItemSearchManager";
 import { Observable } from "@amodx/core/Observers";
 import ItemNode from "./ItemNode";
+import { Builder } from "../../Builder";
 const getName = (state: VoxelNamedStateContainer) => {
   const data = VoxelIndex.instance.dataMap.get(state.voxelId);
   if (data?.title) return data.title;
@@ -17,8 +18,10 @@ const getName = (state: VoxelNamedStateContainer) => {
   return state.voxelId;
 };
 export default function ItemGroup({
+  builder,
   state,
 }: {
+  builder: Builder;
   state: VoxelNamedStateContainer;
 }) {
   const image = VoxelTextureIndex.getImage(
@@ -107,7 +110,7 @@ export default function ItemGroup({
         })
     ),
     state.stateArray.map((state) =>
-      ItemNode({ state, enabledObserver, isGroup: true })
+      ItemNode({ state, enabledObserver, isGroup: true, builder })
     )
   );
 }

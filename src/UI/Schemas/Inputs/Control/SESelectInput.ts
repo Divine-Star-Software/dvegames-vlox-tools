@@ -1,8 +1,8 @@
 import { SelectPropertyInput } from "@amodx/schemas";
 import { SchemaEditorInputRegister } from "../../SchemaEditorInputRegister";
-import { SEInputBase } from "../../SEInputBase";
 import { ElementChildren, elm } from "@amodx/elm";
-import { SEInputBaseProps } from "UI/Schemas/SEInputElement";
+import { SEInputBase } from "../../SEInputBase";
+import { SEInputBaseProps } from "../../SEInputElement";
 SchemaEditorInputRegister.register(
   SelectPropertyInput,
   SelectPropertyInput.createPropertyRenderFC<ElementChildren, SEInputBaseProps>(
@@ -10,6 +10,17 @@ SchemaEditorInputRegister.register(
       const { node } = props;
       const input = node.input!.data;
 
+      const options = input.properties.options.map((item) => {
+        return elm(
+          "option",
+          {
+            selected:
+              String(Array.isArray(item) ? item[0] : item) == node.get(),
+            value: String(Array.isArray(item) ? item[1] : item),
+          },
+          String(Array.isArray(item) ? item[0] : item)
+        );
+      });
       return SEInputBase(
         props,
         elm(
@@ -28,15 +39,7 @@ SchemaEditorInputRegister.register(
               },
             },
           },
-          input.properties.options.map((item) => {
-            return elm(
-              "option",
-              {
-                value: String(Array.isArray(item) ? item[1] : item),
-              },
-              String(Array.isArray(item) ? item[0] : item)
-            );
-          })
+          options
         )
       );
     }

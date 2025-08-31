@@ -46,6 +46,7 @@ export default function () {
   ]);
   RegisterMathNodes(DVEFlowNodeRegister, DVEFlowNodePaletteRegister);
   RegisterIO(DVEFlowNodeRegister);
+
   editor.flowNodeRegsiter = DVEFlowNodeRegister;
   editor.flowNodePalette = DVEFlowNodePaletteRegister;
   editor.flowGraph = new FlowGraph({
@@ -60,4 +61,7 @@ export default function () {
     nodes: [],
   });
   document.body.append(editor);
+  const noiseVisualizer = document.createElement("noise-visualizer");
+  noiseVisualizer.editor = editor;
+  editor.visualizerContainer.append(noiseVisualizer);
 }
