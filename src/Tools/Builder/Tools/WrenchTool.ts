@@ -65,19 +65,14 @@ export default function ({ builder }: { builder: Builder }) {
       "updated",
       async () => {
         if (wrenchTool.isUpdating()) return;
-        const picked = await builder.space.pick(
-          builder.rayProvider.origin,
-          builder.rayProvider.direction,
-          100
-        );
-        if (!picked) {
+        await wrenchTool.update();
+        if (!wrenchTool.picked) {
           if (voxelSelectionHighlight.isEnaebled())
             voxelSelectionHighlight.setEnabled(false);
           return;
         }
         if (!voxelSelectionHighlight.isEnaebled())
           voxelSelectionHighlight.setEnabled(true);
-        wrenchTool.updatePlacer(picked);
         voxelSelectionHighlight.update(wrenchTool.selection);
       }
     );

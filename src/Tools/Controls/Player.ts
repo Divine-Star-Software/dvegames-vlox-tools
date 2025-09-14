@@ -215,47 +215,45 @@ function PlayerView(node: NodeCursor) {
 }
 
 export default function (graph: Graph) {
-  ToolPanelViews.registerView("Player", (component) => {
-    const update = useSignal();
-    return frag(
+  const update = useSignal();
+  return frag(
+    elm(
+      "div",
+      {
+        style: {
+          display: "flex",
+          flexDirection: "row",
+        },
+      },
       elm(
-        "div",
+        "button",
         {
-          style: {
-            display: "flex",
-            flexDirection: "row",
+          onclick() {
+            Player.create();
+            update.broadcast();
           },
         },
-        elm(
-          "button",
-          {
-            onclick() {
-              Player.create();
-              update.broadcast();
-            },
-          },
-          "Create Player"
-        ),
-        elm(
-          "button",
-          {
-            onclick() {
-              Player.destroy();
-              update.broadcast();
-            },
-          },
-          "Desotry Player"
-        )
+        "Create Player"
       ),
-      elm("div", {
-        signal: [
-          update((elm) => {
-            if (!Player.node!) return (elm.innerHTML = "");
-            elm.append(PlayerView(Player.node!));
-          }),
-        ],
-      }),
-      (Player.node && PlayerView(Player.node!)) || null
-    );
-  });
+      elm(
+        "button",
+        {
+          onclick() {
+            Player.destroy();
+            update.broadcast();
+          },
+        },
+        "Desotry Player"
+      )
+    ),
+    elm("div", {
+      signal: [
+        update((elm) => {
+          if (!Player.node!) return (elm.innerHTML = "");
+          elm.append(PlayerView(Player.node!));
+        }),
+      ],
+    }),
+    (Player.node && PlayerView(Player.node!)) || null
+  );
 }

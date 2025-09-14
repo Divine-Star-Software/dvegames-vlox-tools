@@ -9,7 +9,6 @@ import { SchemaEditor } from "../../../../UI/Schemas/SchemaEditor";
 import { Schema, SelectProp } from "@amodx/schemas";
 import { VoxelSelectionHighlight } from "@divinevoxel/vlox-babylon/Tools/VoxelSelectionHighlight";
 import { Vec3Array } from "@amodx/math";
-import { VoxelTemplateSelection } from "@divinevoxel/vlox/Templates/Selection/VoxelTemplateSelection";
 import { BrushToolShapes } from "./BrushToolShapes";
 import "./Shapes/index";
 const colors: Record<BrushToolModes, Vec3Array> = {
@@ -31,32 +30,24 @@ export default function ({ builder }: { builder: Builder }) {
       "pointer-down",
       async (event) => {
         if (event.detail.button !== 0) return;
-        const picked = await builder.space.pick(
-          builder.rayProvider.origin,
-          builder.rayProvider.direction,
-          100
-        );
-        if (!picked) return;
-        brushTool.use(picked, { fill: builder.paintData });
+
+        brushTool.voxelData = { fill: builder.paintData };
+        await brushTool.use();
       }
     );
     builder.addEventListener("pointer-down", pointerDown);
     const rayUpdated = builder.rayProvider.createEventListener(
       "updated",
       async () => {
-        const picked = await builder.space.pick(
-          builder.rayProvider.origin,
-          builder.rayProvider.direction,
-          100
-        );
-        if (!picked) {
+        await brushTool.update();
+        if (!brushTool.picked) {
           if (voxelSelectionHighlight.isEnaebled())
             voxelSelectionHighlight.setEnabled(false);
           return;
         }
         if (!voxelSelectionHighlight.isEnaebled())
           voxelSelectionHighlight.setEnabled(true);
-        brushTool.updatePlacer(picked);
+
         voxelSelectionHighlight.update(brushTool.selection);
       }
     );

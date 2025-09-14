@@ -1,5 +1,4 @@
 import { elm, frag } from "@amodx/elm";
-import { DivineVoxelEngineRender } from "@divinevoxel/vlox/Contexts/Render";
 import { ToolPanelViews } from "../../ToolPanelViews";
 import { Graph } from "@amodx/ncs";
 import { BinaryObject } from "@amodx/binary";
@@ -14,12 +13,11 @@ import { useFileUpload } from "../../UI/Hooks/useFileUpload";
 import { Schema, SelectProp } from "@amodx/schemas";
 import { Vec3Array, Vector3Like } from "@amodx/math";
 import { Node } from "@amodx/ncs/";
-
 import { VoxelBoxVolumeComponent } from "@dvegames/vlox/Voxels/Volumes/VoxelBoxVolume.component";
 import { VoxelBoxVolumeMeshComponent } from "@dvegames/vlox/Voxels/Volumes/VoxelBoxVolumeMesh.component";
-import { ArchivedVoxelTemplate } from "@divinevoxel/vlox/Templates/Archive/ArchivedVoxelTemplate";
 import { ArchivedVoxelTemplateData } from "@divinevoxel/vlox/Templates/Archive/ArchivedVoxelTemplate.types";
 import { DimensionProviderComponent } from "@dvegames/vlox/Providers/DimensionProvider.component";
+import CollapsibleSection from "../../UI/Components/CollapsibleSection";
 class Templates {
   static node: NodeCursor;
 
@@ -201,58 +199,59 @@ const VoxelTemplateComp = (nodeIndex: number) => {
 };
 
 export default function (graph: Graph) {
-  ToolPanelViews.registerView("VoxelTemplates", (component) => {
-    const voxelsParent = elm("div", "voxels");
-    const { fileInput, uploadFile } = useFileUpload();
+  const voxelsParent = elm("div", "voxels");
 
-    Templates.node.observers.childAdded.subscribe((node) => {
-      elm.appendChildern(voxelsParent, [VoxelTemplateComp(node.index)]);
-    });
+  Templates.init(graph);
+  Templates.node.observers.childAdded.subscribe((node) => {
+    elm.appendChildern(voxelsParent, [VoxelTemplateComp(node.index)]);
+  });
 
-    if (Templates.node.childrenArray) {
-      for (const child of Templates.node.childrenArray) {
-        elm.appendChildern(voxelsParent, [VoxelTemplateComp(child)]);
-      }
+  if (Templates.node.childrenArray) {
+    for (const child of Templates.node.childrenArray) {
+      elm.appendChildern(voxelsParent, [VoxelTemplateComp(child)]);
     }
+  }
 
-    return frag(
+  const { fileInput, uploadFile } = useFileUpload();
+  return CollapsibleSection(
+    { title: "Templates" },
+
+    elm(
+      "div",
+      {
+        style: {
+          display: "flex",
+          flexDirection: "row",
+        },
+      },
       elm(
-        "div",
+        "button",
         {
-          style: {
-            display: "flex",
-            flexDirection: "row",
+          onclick() {
+            Templates.addTemplate([0, 5, 0], [18, 26, 18]);
           },
         },
-        elm(
-          "button",
-          {
-            onclick() {
-              Templates.addTemplate([0, 5, 0], [18, 26, 18]);
-            },
-          },
-          "Add New Template"
-        ),
-        elm(
-          "button",
-          {
-            async onclick() {
-              const binary = await uploadFile("binary");
-              if (!binary) return;
-              BinaryObject.setUseSharedMemory(true);
-              const template = BinaryObject.bufferToObject(
-                (await Compressor.core.decompressArrayBuffer(binary)).buffer
-              ) as any;
-              BinaryObject.setUseSharedMemory(false);
-
-              await Templates.loadTemplate(template);
-            },
-          },
-          "Load Template"
-        )
+        "Add New Template"
       ),
-      fileInput,
-      voxelsParent
-    );
-  });
+      elm(
+        "button",
+        {
+          async onclick() {
+            const binary = await uploadFile("binary");
+            if (!binary) return;
+            BinaryObject.setUseSharedMemory(true);
+            const template = BinaryObject.bufferToObject(
+              (await Compressor.core.decompressArrayBuffer(binary)).buffer
+            ) as any;
+            BinaryObject.setUseSharedMemory(false);
+
+            await Templates.loadTemplate(template);
+          },
+        },
+        "Load Template"
+      )
+    ),
+    fileInput,
+    voxelsParent
+  );
 }

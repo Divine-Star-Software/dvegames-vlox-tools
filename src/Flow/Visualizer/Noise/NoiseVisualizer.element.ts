@@ -158,11 +158,11 @@ noise-visualizer {
     this.state.viewMode = view;
     this.dispatchEvent(new NSEvent("view-mode-changed", this.state));
     if (this.state.viewMode == NoiseViewModes.View2D) {
-      this.noise3dCanvas.remove();
+      if (this.noise3dCanvas) this.noise3dCanvas.remove();
       this.canvasContainer.append(this.noise2dCanvas);
     }
     if (this.state.viewMode == NoiseViewModes.View3D) {
-      this.noise2dCanvas.remove();
+      if (this.noise2dCanvas) this.noise2dCanvas.remove();
       this.canvasContainer.append(this.noise3dCanvas);
     }
   }

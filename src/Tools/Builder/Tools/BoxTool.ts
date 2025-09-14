@@ -37,13 +37,7 @@ export default function ({ builder }: { builder: Builder }) {
         if (event.detail.button !== 0) return;
         isPointerDown = true;
         if (currentTemplateControls) return;
-        const picked = await builder.space.pick(
-          builder.rayProvider.origin,
-          builder.rayProvider.direction,
-          100
-        );
-        if (!picked) return;
-        boxTool.updatePlacer(picked, "start");
+        await boxTool.update("start");
         voxelSelectionHighlight.update(boxTool.selection);
       }
     );
@@ -55,9 +49,9 @@ export default function ({ builder }: { builder: Builder }) {
         if (event.detail.button !== 0) return;
         isPointerDown = false;
         if (currentTemplateControls || !boxTool.isSelectionStarted()) return;
-        boxTool.updatePlacer(null, "end");
+        boxTool.update("end");
         voxelSelectionHighlight.update(boxTool.selection);
-        boxTool.use(builder.paintData);
+        boxTool.voxelData = builder.paintData;
       }
     );
     builder.addEventListener("pointer-up", pointerUp);
@@ -87,17 +81,7 @@ export default function ({ builder }: { builder: Builder }) {
     const rayUpdated = builder.rayProvider.createEventListener(
       "updated",
       async () => {
-        if (!boxTool.isSelectionStarted()) {
-          const picked = await builder.space.pick(
-            builder.rayProvider.origin,
-            builder.rayProvider.direction,
-            100
-          );
-          boxTool.updatePlacer(picked);
-        } else {
-          boxTool.updatePlacer(null);
-        }
-
+        await boxTool.update();
         voxelSelectionHighlight.update(boxTool.selection);
       }
     );
@@ -141,9 +125,7 @@ export default function ({ builder }: { builder: Builder }) {
               }),
               ButtonProp("delete", {
                 name: "Delete",
-                value: () => {
-                  if (templateDipose) templateDipose();
-                },
+                value: () => templateDipose && templateDipose(),
               }),
             ],
           })
@@ -182,11 +164,12 @@ export default function ({ builder }: { builder: Builder }) {
           SelectProp("Modes", {
             options: BoxTool.ModeArray,
             value: boxTool.mode,
-            initialize: (node) =>
+            initialize(node) {
               node.observers.updatedOrLoadedIn.subscribe(() => {
                 boxTool.mode = node.get();
                 voxelSelectionHighlight.mesh.setColor(...colors[boxTool.mode]);
-              }),
+              });
+            },
           }),
         ],
       }),

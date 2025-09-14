@@ -1,11 +1,37 @@
-import { ToolPanelViews } from "../../ToolPanelViews";
+import { elm, frag } from "@amodx/elm";
 import { Graph, Node } from "@amodx/ncs/";
+import { SchemaEditor } from "../../UI/Schemas/SchemaEditor";
+import { Builder } from "./Builder";
+import { BabylonContext } from "@dvegames/vlox/Babylon/Babylon.context";
+import { RendererContext } from "@dvegames/vlox/Contexts/Renderer.context";
+import CollapsibleSection from "../../UI/Components/CollapsibleSection";
 import { TransformComponent } from "@dvegames/vlox/Transform.component";
 import { AxesViewerComponent } from "@dvegames/vlox/Debug/AxesViewer.component";
 import { VoxelPositionGuideComponent } from "@dvegames/vlox/Debug/VoxelPositionGuide.component";
-import { elm, frag } from "@amodx/elm";
-import { SchemaEditor } from "../../UI/Schemas/SchemaEditor";
+elm.css(/* css */ `
+.builder {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+
+  hr {
+    width: 100%;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+  }
+
+}
+  `);
 export default function (graph: Graph) {
+  const rendererContext = RendererContext.getRequired(graph.root);
+  const { scene } = BabylonContext.getRequired(graph.root).data;
+
+  const builder = new Builder(rendererContext.data.dve, scene);
+
+  scene.registerBeforeRender(() => {
+    builder;
+  });
+
   const axesNode = graph
     .addNode(Node("Guides", [AxesViewerComponent()]))
     .cloneCursor();
@@ -19,8 +45,10 @@ export default function (graph: Graph) {
       ])
     )
     .cloneCursor();
-  ToolPanelViews.registerView("Guides", () => {
-    return frag(
+
+  return CollapsibleSection(
+    { title: "Guides" },
+    frag(
       elm("p", {}, "World Axes"),
       SchemaEditor({
         schema: AxesViewerComponent.get(axesNode)!.schema,
@@ -32,6 +60,6 @@ export default function (graph: Graph) {
       SchemaEditor({
         schema: VoxelPositionGuideComponent.get(guideNode)!.schema,
       })
-    );
-  });
+    )
+  );
 }

@@ -24,8 +24,8 @@ export default function ({ builder }: { builder: Builder }) {
   const voxelSelectionHighlight = new VoxelSelectionHighlight(builder.scene);
   voxelSelectionHighlight.mesh.setColor(...colors[pathTool.mode]);
 
-  const controls = new VoxelPathControls(builder.scene, builder.rayProvider);
-  controls.setPath(pathTool.path);
+  const pathControls = new VoxelPathControls(builder.scene, builder.rayProvider);
+  pathControls.setPath(pathTool.path);
 
   const mountTool = () => {
     voxelSelectionHighlight.setEnabled(true);
@@ -33,18 +33,19 @@ export default function ({ builder }: { builder: Builder }) {
       "pointer-down",
       async (event) => {
         if (event.detail.button !== 0) return;
-        controls.update(true);
+        pathControls.update(true);
         if (pathTool.mode == PathToolModes.MovePoints) {
-          controls.editHovered();
+          pathControls.editHovered();
           return;
         }
-        if (controls.isEditing()) return;
+        if (pathControls.isEditing()) return;
         if (pathTool.mode == PathToolModes.RemovePoints) {
-          controls.removedHovered();
+          pathControls.removedHovered();
           return;
         }
 
-        pathTool.use(builder.paintData);
+        pathTool.voxelData = builder.paintData;
+        await pathTool.use();
       }
     );
     builder.addEventListener("pointer-down", pointerDown);
@@ -52,14 +53,14 @@ export default function ({ builder }: { builder: Builder }) {
       "pointer-up",
       async (event) => {
         if (event.detail.button !== 0) return;
-        controls.update(false);
+        pathControls.update(false);
       }
     );
     builder.addEventListener("pointer-up", pointerUp);
     const rayUpdated = builder.rayProvider.createEventListener(
       "updated",
       async () => {
-        pathTool.updatePlacer();
+        await pathTool.update();
         voxelSelectionHighlight.update(pathTool.selection);
       }
     );
@@ -75,7 +76,7 @@ export default function ({ builder }: { builder: Builder }) {
   const unMountTool = () => {
     if (onDispose) onDispose();
     voxelSelectionHighlight.setEnabled(false);
-    controls.setEnabled(false);
+    pathControls.setEnabled(false);
   };
 
   builder.addEventListener("tool-set", () => {
@@ -88,12 +89,12 @@ export default function ({ builder }: { builder: Builder }) {
       newMode == PathToolModes.MovePoints ||
       newMode == PathToolModes.RemovePoints
     ) {
-      controls.setHoverEnabled(true);
+      pathControls.setHoverEnabled(true);
     } else {
-      controls.setHoverEnabled(false);
+      pathControls.setHoverEnabled(false);
     }
     if (newMode !== PathToolModes.MovePoints) {
-      controls.stopEditing();
+      pathControls.stopEditing();
     }
     if (newMode == PathToolModes.PlacePoints) {
       voxelSelectionHighlight.setEnabled(true);
@@ -101,7 +102,7 @@ export default function ({ builder }: { builder: Builder }) {
       voxelSelectionHighlight.setEnabled(false);
     }
     pathTool.setMode(newMode);
-    controls.setColor(...colors[newMode]);
+    pathControls.setColor(...colors[newMode]);
     voxelSelectionHighlight.mesh.setColor(...colors[newMode]);
   };
   updateModes(PathToolModes.PlacePoints);

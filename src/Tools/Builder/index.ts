@@ -1,8 +1,8 @@
-import { elm } from "@amodx/elm";
+import { elm, frag } from "@amodx/elm";
 import VoxelDisplay from "./Components/VoxelDisplay";
 import VoxelSelect from "./Components/Select/VoxelSelect";
 import { ToolPanelViews } from "../../ToolPanelViews";
-import { Graph } from "@amodx/ncs/";
+import { Graph, Node } from "@amodx/ncs/";
 import { SchemaEditor } from "../../UI/Schemas/SchemaEditor";
 import { Schema, SelectProp } from "@amodx/schemas";
 import { Builder, BuilderToolIds } from "./Builder";
@@ -14,7 +14,9 @@ import BoxTool from "./Tools/BoxTool";
 import WandTool from "./Tools/WandTool";
 import PathTool from "./Tools/PathTool";
 import WrenchTool from "./Tools/WrenchTool";
-
+import CollapsibleSection from "../../UI/Components/CollapsibleSection";
+import Guides from "./Guides";
+import Templates from "./Templates";
 elm.css(/* css */ `
 .builder {
   display: flex;
@@ -40,47 +42,55 @@ export default function (graph: Graph) {
   });
 
   ToolPanelViews.registerView("Build", () => {
-    return elm(
-      "div",
-      {
-        className: "builder",
-        hooks: {
-          afterRender() {
-            builder.setTool(BuilderToolIds.Hand);
+    return frag(
+      CollapsibleSection(
+        { title: "Tools", opened: true },
+        elm(
+          "div",
+          {
+            className: "builder",
+            hooks: {
+              afterRender() {
+                builder.setTool(BuilderToolIds.Hand);
+              },
+            },
           },
-        },
-      },
-      SchemaEditor({
-        schemaInstance: Schema.CreateInstance(
-          SelectProp("tool", {
-            options: [
-              BuilderToolIds.Hand,
-              BuilderToolIds.Box,
-              BuilderToolIds.Brush,
-              BuilderToolIds.Wand,
-              BuilderToolIds.Path,
-              BuilderToolIds.Wrench,
-            ],
-            initialize: (node) =>
-              node.observers.updatedOrLoadedIn.subscribe(() =>
-                builder.setTool(node.get())
-              ),
-          })
-        ),
-      }),
-      elm(
-        "div",
-        {},
-        HandTool({ builder }),
-        WandTool({ builder }),
-        BoxTool({ builder }),
-        BrushTool({ builder }),
-        PathTool({ builder }),
-        WrenchTool({ builder })
+          SchemaEditor({
+            schemaInstance: Schema.CreateInstance(
+              SelectProp("tool", {
+                options: [
+                  BuilderToolIds.Hand,
+                  BuilderToolIds.Box,
+                  BuilderToolIds.Brush,
+                  BuilderToolIds.Wand,
+                  BuilderToolIds.Path,
+                  BuilderToolIds.Wrench,
+                ],
+                initialize(node) {
+                  node.observers.updatedOrLoadedIn.subscribe(() =>
+                    builder.setTool(node.get())
+                  );
+                },
+              })
+            ),
+          }),
+          elm(
+            "div",
+            {},
+            HandTool({ builder }),
+            WandTool({ builder }),
+            BoxTool({ builder }),
+            BrushTool({ builder }),
+            PathTool({ builder }),
+            WrenchTool({ builder })
+          ),
+          elm("hr"),
+          VoxelDisplay({ builder }),
+          VoxelSelect({ builder })
+        )
       ),
-      elm("hr"),
-      VoxelDisplay({ builder }),
-      VoxelSelect({ builder })
+      Templates(graph),
+      Guides(graph)
     );
   });
 }

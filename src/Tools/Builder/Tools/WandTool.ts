@@ -27,32 +27,22 @@ export default function ({ builder }: { builder: Builder }) {
       "pointer-down",
       async (event) => {
         if (event.detail.button !== 0) return;
-        const picked = await builder.space.pick(
-          builder.rayProvider.origin,
-          builder.rayProvider.direction,
-          100
-        );
-        if (!picked) return;
-        wandTool.use(picked, builder.paintData);
+        wandTool.voxelData = builder.paintData;
+        await wandTool.use();
       }
     );
     builder.addEventListener("pointer-down", pointerDown);
     const rayUpdated = builder.rayProvider.createEventListener(
       "updated",
       async () => {
-        const picked = await builder.space.pick(
-          builder.rayProvider.origin,
-          builder.rayProvider.direction,
-          100
-        );
-        if (!picked) {
+        await wandTool.update();
+        if (!wandTool.picked) {
           if (voxelSelectionHighlight.isEnaebled())
             voxelSelectionHighlight.setEnabled(false);
           return;
         }
         if (!voxelSelectionHighlight.isEnaebled())
           voxelSelectionHighlight.setEnabled(true);
-        await wandTool.updatePlacer(picked);
         voxelSelectionHighlight.update(wandTool.selection);
       }
     );

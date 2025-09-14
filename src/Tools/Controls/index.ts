@@ -5,6 +5,7 @@ import { SchemaEditor } from "../../UI/Schemas/SchemaEditor";
 import { Graph, Node } from "@amodx/ncs/";
 import { BabylonContext } from "@dvegames/vlox/Babylon/Babylon.context";
 import { CrossHairsComponent } from "@dvegames/vlox/Babylon/Interaction/CrossHairs.component";
+import Player from "./Player";
 
 export default function (graph: Graph) {
   const context = BabylonContext.getRequired(graph.root);
@@ -53,7 +54,8 @@ export default function (graph: Graph) {
     return frag(
       SchemaEditor({
         schemaInstance,
-      })
+      }),
+      Player(graph)
     );
   });
 }

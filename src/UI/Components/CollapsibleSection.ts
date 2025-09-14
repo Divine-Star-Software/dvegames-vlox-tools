@@ -59,10 +59,11 @@ const svgIcon = elm.html(/* html */ `
 export default wrap<
   {
     title: string;
+    opened?: boolean;
   },
   "div"
->("div", true, ({ title }, children) => {
-  const expanded = useSignal(false);
+>("div", true, ({ title, opened }, children) => {
+  const expanded = useSignal(opened ? true : false);
 
   return elm(
     "div",
@@ -80,7 +81,7 @@ export default wrap<
       elm(
         "div",
         {
-          className: "expand-button closed",
+          className: `expand-button ${expanded.value ? "expanded" : "closed"}`,
           signal: expanded((elm) =>
             elm.classList.replace(
               expanded.value ? "closed" : "expanded",
@@ -94,7 +95,9 @@ export default wrap<
     elm(
       "div",
       {
-        className: "collapsible-section-content closed",
+        className: `collapsible-section-content ${
+          expanded.value ? "expanded" : "closed"
+        }`,
         signal: expanded((elm) =>
           elm.classList.replace(
             expanded.value ? "closed" : "expanded",
