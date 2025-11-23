@@ -20,7 +20,7 @@ SchemaEditorInputRegister.register(
           oninput: ({ target }) => {
             node.update(convertHexToRGB((target as HTMLInputElement).value));
           },
-          signal: updateInput(
+          signal: updateInput.add(
             (elm) =>
               ((elm as HTMLInputElement).value = convertRGBToHex(node.get()))
           ),

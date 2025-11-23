@@ -19,7 +19,7 @@ SchemaEditorInputRegister.register(
           oninput: ({ target }) => {
             node.update((target as HTMLInputElement).value);
           },
-          signal: updateInput(
+          signal: updateInput.add(
             (elm) => ((elm as HTMLInputElement).value = String(node.get()))
           ),
         })

@@ -21,7 +21,7 @@ SchemaEditorInputRegister.register(
         onchange: ({ target }) => {
           node.update(Boolean((target as HTMLInputElement).checked));
         },
-        signal: updateInput(
+        signal: updateInput.add(
           (elm) => ((elm as HTMLInputElement).checked = Boolean(node.get()))
         ),
       })

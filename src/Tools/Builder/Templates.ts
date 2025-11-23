@@ -203,12 +203,12 @@ export default function (graph: Graph) {
 
   Templates.init(graph);
   Templates.node.observers.childAdded.subscribe((node) => {
-    elm.appendChildern(voxelsParent, [VoxelTemplateComp(node.index)]);
+    elm.appendChildren(voxelsParent, [VoxelTemplateComp(node.index)]);
   });
 
   if (Templates.node.childrenArray) {
     for (const child of Templates.node.childrenArray) {
-      elm.appendChildern(voxelsParent, [VoxelTemplateComp(child)]);
+      elm.appendChildren(voxelsParent, [VoxelTemplateComp(child)]);
     }
   }
 

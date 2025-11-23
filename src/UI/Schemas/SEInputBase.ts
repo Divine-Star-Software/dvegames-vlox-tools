@@ -44,7 +44,7 @@ export const SEInputBase = wrap<SEProps, "div">(
       {
         className: `form-group ${node.isEnabled() ? "enabled" : "disabled"}`,
         signal: [
-          conditionsSignal(async (el) => {
+          conditionsSignal.add(async (el) => {
             if (!node.isEnabled()) {
               if (
                 el.className.includes("form-group") &&

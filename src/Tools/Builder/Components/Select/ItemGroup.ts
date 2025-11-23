@@ -87,7 +87,7 @@ export default function ItemGroup({
       {
         ref,
         className: "item-group closed",
-        signal: expanded((elm) =>
+        signal: expanded.add((elm) =>
           elm.classList.replace(
             expanded.value ? "closed" : "expanded",
             expanded.value ? "expanded" : "closed"

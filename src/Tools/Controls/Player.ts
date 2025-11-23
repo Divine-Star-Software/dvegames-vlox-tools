@@ -247,12 +247,10 @@ export default function (graph: Graph) {
       )
     ),
     elm("div", {
-      signal: [
-        update((elm) => {
-          if (!Player.node!) return (elm.innerHTML = "");
-          elm.append(PlayerView(Player.node!));
-        }),
-      ],
+      signal: update.add((elm) => {
+        if (!Player.node!) return (elm.innerHTML = "");
+        elm.append(PlayerView(Player.node!));
+      }),
     }),
     (Player.node && PlayerView(Player.node!)) || null
   );

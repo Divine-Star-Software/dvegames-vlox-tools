@@ -72,7 +72,6 @@ export default wrap<
       "div",
       {
         className: "collapsible-section-title",
-        signal: expanded(() => {}),
         onclick() {
           expanded.value = !expanded.value;
         },
@@ -82,7 +81,7 @@ export default wrap<
         "div",
         {
           className: `expand-button ${expanded.value ? "expanded" : "closed"}`,
-          signal: expanded((elm) =>
+          signal: expanded.add((elm) =>
             elm.classList.replace(
               expanded.value ? "closed" : "expanded",
               expanded.value ? "expanded" : "closed"
@@ -98,7 +97,7 @@ export default wrap<
         className: `collapsible-section-content ${
           expanded.value ? "expanded" : "closed"
         }`,
-        signal: expanded((elm) =>
+        signal: expanded.add((elm) =>
           elm.classList.replace(
             expanded.value ? "closed" : "expanded",
             expanded.value ? "expanded" : "closed"

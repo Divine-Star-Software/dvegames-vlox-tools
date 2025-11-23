@@ -30,7 +30,7 @@ export const VectorInputBase = wrap<
         vector[props.property] = parseFloat((target as HTMLInputElement).value);
         node.update(vector);
       },
-      signal: updateInput((elm) => {
+      signal: updateInput.add((elm) => {
         const vector = node.get();
         (elm as HTMLInputElement).value = String(vector[props.property]);
       }),

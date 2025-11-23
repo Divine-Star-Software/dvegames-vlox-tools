@@ -23,7 +23,7 @@ SchemaEditorInputRegister.register(
             const value = parseInt((target as HTMLInputElement).value);
             node.update(Number.isNaN(value) ? 0 : value);
           },
-          signal: updateInput((elm) => {
+          signal: updateInput.add((elm) => {
             (elm as HTMLInputElement).value = String(node.get());
           }),
         })
