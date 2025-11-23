@@ -13,11 +13,13 @@ import { PaintVoxelData } from "@divinevoxel/vlox/Voxels";
 
 export enum BuilderToolIds {
   Hand = "Hand",
-  Box = "Box",
+  Sculpt = "Sculpt",
+  Shape = "Shape",
   Brush = "Brush",
   Wand = "Wand",
   Wrench = "Wrench",
   Path = "Path",
+  Template = "Template",
 }
 type RayModes = "camera" | "mouse";
 
@@ -115,19 +117,13 @@ export class Builder extends TypedEventTarget<BuilderEvents> {
       if (event.type == PointerEventTypes.POINTERUP) {
         this.dispatch("pointer-up", event.event as MouseEvent);
       }
-
       if (event.type == PointerEventTypes.POINTERWHEEL) {
         const wheelEvent = event.event as WheelEvent;
-        console.warn("pointer wheel event");
-        console.warn(wheelEvent, wheelEvent.deltaY);
         if (wheelEvent.deltaY < 0) {
           this.dispatch("wheel-up", event.event as WheelEvent);
         } else {
           this.dispatch("wheel-down", event.event as WheelEvent);
         }
-      }
-      if (event.type == PointerEventTypes.POINTERUP) {
-        this.dispatch("pointer-up", event.event as MouseEvent);
       }
       if (event.type == PointerEventTypes.POINTERMOVE) {
         this.dispatch("pointer-move", event.event as MouseEvent);

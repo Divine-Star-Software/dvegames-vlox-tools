@@ -1,37 +1,37 @@
 import { BrushToolShapes } from "../BrushToolShapes";
-import { BoxVoxelTemplate } from "@divinevoxel/vlox/Templates/Shapes/BoxVoxelTemplate";
+import { BoxVoxelShapeSelection } from "@divinevoxel/vlox/Templates/Shapes/Selections/BoxVoxelShapeSelection";
 import { SchemaEditor } from "../../../../../UI/Schemas/SchemaEditor";
 import { IntProp } from "@amodx/schemas";
-BrushToolShapes.registerShape("Box", (template: BoxVoxelTemplate) => {
+BrushToolShapes.registerShape("Box", (selection: BoxVoxelShapeSelection) => {
   return SchemaEditor({
     properties: [
       IntProp("Width", {
         min: 1,
         max: 100,
-        value: template.width,
+        value: selection.width,
         initialize: (node) => {
           node.observers.updatedOrLoadedIn.subscribe(
-            () => (template.width = node.get())
+            () => (selection.width = node.get())
           );
         },
       }),
       IntProp("Height", {
         min: 1,
         max: 100,
-        value: template.height,
+        value: selection.height,
         initialize: (node) => {
           node.observers.updatedOrLoadedIn.subscribe(
-            () => (template.height = node.get())
+            () => (selection.height = node.get())
           );
         },
       }),
       IntProp("Depth", {
         min: 1,
         max: 100,
-        value: template.depth,
+        value: selection.depth,
         initialize: (node) => {
           node.observers.updatedOrLoadedIn.subscribe(
-            () => (template.depth = node.get())
+            () => (selection.depth = node.get())
           );
         },
       }),

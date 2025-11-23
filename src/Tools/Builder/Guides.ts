@@ -1,9 +1,6 @@
 import { elm, frag } from "@amodx/elm";
 import { Graph, Node } from "@amodx/ncs/";
 import { SchemaEditor } from "../../UI/Schemas/SchemaEditor";
-import { Builder } from "./Builder";
-import { BabylonContext } from "@dvegames/vlox/Babylon/Babylon.context";
-import { RendererContext } from "@dvegames/vlox/Contexts/Renderer.context";
 import CollapsibleSection from "../../UI/Components/CollapsibleSection";
 import { TransformComponent } from "@dvegames/vlox/Transform.component";
 import { AxesViewerComponent } from "@dvegames/vlox/Debug/AxesViewer.component";
@@ -23,20 +20,12 @@ elm.css(/* css */ `
 }
   `);
 export default function (graph: Graph) {
-  const rendererContext = RendererContext.getRequired(graph.root);
-  const { scene } = BabylonContext.getRequired(graph.root).data;
-
-  const builder = new Builder(rendererContext.data.dve, scene);
-
-  scene.registerBeforeRender(() => {
-    builder;
-  });
-
-  const axesNode = graph
-    .addNode(Node("Guides", [AxesViewerComponent()]))
-    .cloneCursor();
-  const guideNode = graph
-    .addNode(
+  const axesNode = AxesViewerComponent.getRequired(
+    graph.addNode(Node("Guides", [AxesViewerComponent({})]))
+  );
+  axesNode.schema.visible = false;
+  const guideNode = VoxelPositionGuideComponent.getRequired(
+    graph.addNode(
       Node({}, [
         TransformComponent({
           position: { x: 0, y: 30, z: 0 },
@@ -44,21 +33,22 @@ export default function (graph: Graph) {
         VoxelPositionGuideComponent(),
       ])
     )
-    .cloneCursor();
+  );
+  guideNode.schema.visible = false;
 
   return CollapsibleSection(
     { title: "Guides" },
     frag(
       elm("p", {}, "World Axes"),
       SchemaEditor({
-        schema: AxesViewerComponent.get(axesNode)!.schema,
+        schema: axesNode.schema,
       }),
       elm("p", {}, "Voxel Position Guide"),
       SchemaEditor({
-        schema: TransformComponent.get(guideNode)!.schema,
+        schema: TransformComponent.get(guideNode?.node)!.schema,
       }),
       SchemaEditor({
-        schema: VoxelPositionGuideComponent.get(guideNode)!.schema,
+        schema: guideNode!.schema,
       })
     )
   );

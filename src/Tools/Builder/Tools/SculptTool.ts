@@ -2,41 +2,32 @@ import { elm, frag } from "@amodx/elm";
 import { Builder, BuilderToolIds } from "../Builder";
 import { ToolUIElememt } from "./ToolUIElement";
 import {
-  BoxTool,
-  BoxToolModes,
-} from "@divinevoxel/vlox/Builder/Tools/Box/BoxTool";
+  SculptTool,
+  SculptToolModes,
+} from "@divinevoxel/vlox/Builder/Tools/Sculpt/SculptTool";
 import { SchemaEditor } from "../../../UI/Schemas/SchemaEditor";
-import { ButtonProp, SelectProp } from "@amodx/schemas";
+import { SelectProp } from "@amodx/schemas";
 import { VoxelSelectionHighlight } from "@divinevoxel/vlox-babylon/Tools/VoxelSelectionHighlight";
 import { Vec3Array } from "@amodx/math";
-import { VoxelBoxSelectionControls } from "@divinevoxel/vlox-babylon/Tools/VoxelBoxSelectionControls";
-const colors: Record<BoxToolModes, Vec3Array> = {
-  [BoxToolModes.Fill]: [0, 1, 0],
-  [BoxToolModes.Remove]: [1, 0, 0],
-  [BoxToolModes.Extrude]: [1, 1, 0],
-  [BoxToolModes.Template]: [0, 0, 1],
+const colors: Record<SculptToolModes, Vec3Array> = {
+  [SculptToolModes.Fill]: [0, 1, 0],
+  [SculptToolModes.Remove]: [1, 0, 0],
+  [SculptToolModes.Extrude]: [1, 1, 0],
 };
 
 export default function ({ builder }: { builder: Builder }) {
   let onDispose: (() => void) | null = null;
-  const boxTool = new BoxTool(builder.space);
+  const boxTool = new SculptTool(builder.space);
 
   const voxelSelectionHighlight = new VoxelSelectionHighlight(builder.scene);
   voxelSelectionHighlight.mesh.setColor(...colors[boxTool.mode]);
 
-  let templateDipose: (() => void) | null = null;
-  const templateContainer = document.createElement("div");
-
   const mountTool = () => {
-    let isPointerDown = false;
-    let currentTemplateControls: VoxelBoxSelectionControls | null = null;
     voxelSelectionHighlight.setEnabled(true);
     const pointerDown = builder.createEventListener(
       "pointer-down",
       async (event) => {
         if (event.detail.button !== 0) return;
-        isPointerDown = true;
-        if (currentTemplateControls) return;
         await boxTool.update("start");
         voxelSelectionHighlight.update(boxTool.selection);
       }
@@ -47,20 +38,16 @@ export default function ({ builder }: { builder: Builder }) {
       "pointer-up",
       async (event) => {
         if (event.detail.button !== 0) return;
-        isPointerDown = false;
-        if (currentTemplateControls || !boxTool.isSelectionStarted()) return;
-        boxTool.update("end");
+        if (!boxTool.isSelectionStarted()) return;
+        await boxTool.update("end");
         voxelSelectionHighlight.update(boxTool.selection);
         boxTool.voxelData = builder.paintData;
+        await boxTool.use();
       }
     );
     builder.addEventListener("pointer-up", pointerUp);
 
     const wheelUp = builder.createEventListener("wheel-up", () => {
-      if (currentTemplateControls) {
-        currentTemplateControls.dispatch("move-up", null);
-        return;
-      }
       if (!boxTool.isSelectionStarted()) return;
       boxTool.updateOffset(boxTool.boxSelection.offset + 1);
       voxelSelectionHighlight.update(boxTool.selection);
@@ -68,10 +55,6 @@ export default function ({ builder }: { builder: Builder }) {
     builder.addEventListener("wheel-up", wheelUp);
 
     const wheelDown = builder.createEventListener("wheel-down", () => {
-      if (currentTemplateControls) {
-        currentTemplateControls.dispatch("move-down", null);
-        return;
-      }
       if (!boxTool.isSelectionStarted()) return;
       boxTool.updateOffset(boxTool.boxSelection.offset - 1);
       voxelSelectionHighlight.update(boxTool.selection);
@@ -87,62 +70,13 @@ export default function ({ builder }: { builder: Builder }) {
     );
     builder.rayProvider.addEventListener("updated", rayUpdated);
 
-    const templateCreated = boxTool.createEventListener(
-      "template-created",
-      async (event) => {
-        const boxTemplate = event.detail;
-        currentTemplateControls = new VoxelBoxSelectionControls(
-          builder.scene,
-          builder.rayProvider,
-          boxTemplate.selection
-        );
-        voxelSelectionHighlight.setEnabled(false);
-        const updateObserver = builder.scene.onBeforeRenderObservable.add(
-          () => {
-            if (!currentTemplateControls) return;
-            currentTemplateControls.update(isPointerDown);
-          }
-        );
-
-        templateDipose = () => {
-          templateContainer.innerHTML = "";
-          voxelSelectionHighlight.setEnabled(true);
-          if (currentTemplateControls) currentTemplateControls.dispose();
-          currentTemplateControls = null;
-          builder.scene.onBeforeRenderObservable.remove(updateObserver);
-        };
-
-        templateContainer.append(
-          SchemaEditor({
-            properties: [
-              ButtonProp("place", {
-                name: "Place",
-                value: () => boxTemplate.place(),
-              }),
-              ButtonProp("clear", {
-                name: "Clear",
-                value: () => boxTemplate.clear(),
-              }),
-              ButtonProp("delete", {
-                name: "Delete",
-                value: () => templateDipose && templateDipose(),
-              }),
-            ],
-          })
-        );
-      }
-    );
-    boxTool.addEventListener("template-created", templateCreated);
-
     onDispose = () => {
       builder.removeEventListener("pointer-down", pointerDown);
       builder.removeEventListener("pointer-up", pointerUp);
       builder.removeEventListener("wheel-up", wheelUp);
       builder.removeEventListener("wheel-down", wheelDown);
       builder.rayProvider.removeEventListener("updated", rayUpdated);
-      boxTool.removeEventListener("template-created", templateCreated);
       onDispose = null;
-      if (templateDipose) templateDipose();
       voxelSelectionHighlight.setEnabled(false);
     };
   };
@@ -151,18 +85,18 @@ export default function ({ builder }: { builder: Builder }) {
   };
 
   builder.addEventListener("tool-set", () => {
-    if (builder.activeTool == BuilderToolIds.Box) return mountTool();
+    if (builder.activeTool == BuilderToolIds.Sculpt) return mountTool();
     unMountTool();
   });
 
   return ToolUIElememt({
     builder,
-    toolId: BuilderToolIds.Box,
+    toolId: BuilderToolIds.Sculpt,
     children: frag(
       SchemaEditor({
         properties: [
           SelectProp("Modes", {
-            options: BoxTool.ModeArray,
+            options: SculptTool.ModeArray,
             value: boxTool.mode,
             initialize(node) {
               node.observers.updatedOrLoadedIn.subscribe(() => {
@@ -172,8 +106,7 @@ export default function ({ builder }: { builder: Builder }) {
             },
           }),
         ],
-      }),
-      templateContainer
+      })
     ),
   });
 }

@@ -10,13 +10,15 @@ import { BabylonContext } from "@dvegames/vlox/Babylon/Babylon.context";
 import { RendererContext } from "@dvegames/vlox/Contexts/Renderer.context";
 import HandTool from "./Tools/HandTool";
 import BrushTool from "./Tools/BrushTool/index";
-import BoxTool from "./Tools/BoxTool";
+import BoxTool from "./Tools/SculptTool";
 import WandTool from "./Tools/WandTool";
 import PathTool from "./Tools/PathTool";
 import WrenchTool from "./Tools/WrenchTool";
 import CollapsibleSection from "../../UI/Components/CollapsibleSection";
 import Guides from "./Guides";
 import Templates from "./Templates";
+import TemplateTool from "./Tools/TemplateTool";
+import ShapeTool from "./Tools/ShapeTool";
 elm.css(/* css */ `
 .builder {
   display: flex;
@@ -60,11 +62,13 @@ export default function (graph: Graph) {
               SelectProp("tool", {
                 options: [
                   BuilderToolIds.Hand,
-                  BuilderToolIds.Box,
+                  BuilderToolIds.Sculpt,
                   BuilderToolIds.Brush,
+                  BuilderToolIds.Shape,
                   BuilderToolIds.Wand,
                   BuilderToolIds.Path,
                   BuilderToolIds.Wrench,
+                  BuilderToolIds.Template,
                 ],
                 initialize(node) {
                   node.observers.updatedOrLoadedIn.subscribe(() =>
@@ -82,7 +86,9 @@ export default function (graph: Graph) {
             BoxTool({ builder }),
             BrushTool({ builder }),
             PathTool({ builder }),
-            WrenchTool({ builder })
+            WrenchTool({ builder }),
+            ShapeTool({ builder }),
+            TemplateTool({ builder })
           ),
           elm("hr"),
           VoxelDisplay({ builder }),

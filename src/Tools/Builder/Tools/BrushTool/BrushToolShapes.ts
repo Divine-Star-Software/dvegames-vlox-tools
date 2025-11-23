@@ -1,18 +1,17 @@
-import { BasicVoxelShapeTemplate } from "@divinevoxel/vlox/Templates/Shapes/BasicVoxelShapeTemplate";
 import {
-  IVoxelShapeTemplate,
-  IVoxelShapeTemplateData,
-} from "@divinevoxel/vlox/Templates/Shapes/VoxelShapeTemplate.types";
+  IVoxelShapeSelection,
+  
+} from "@divinevoxel/vlox/Templates/Shapes/Selections/VoxelShapeSelection";
 
 export class BrushToolShapes {
   static ShapeRendered: Record<
     string,
     (
-      template: IVoxelShapeTemplate<any, any, any>
+      template: IVoxelShapeSelection<any, any>
     ) => HTMLElement | DocumentFragment
   > = {};
 
-  static registerShape<Shape extends IVoxelShapeTemplate<any, any, any>>(
+  static registerShape<Shape extends IVoxelShapeSelection<any, any>>(
     id: string,
     create: (template: Shape) => HTMLElement | DocumentFragment
   ) {

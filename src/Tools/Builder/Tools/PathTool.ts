@@ -24,11 +24,16 @@ export default function ({ builder }: { builder: Builder }) {
   const voxelSelectionHighlight = new VoxelSelectionHighlight(builder.scene);
   voxelSelectionHighlight.mesh.setColor(...colors[pathTool.mode]);
 
-  const pathControls = new VoxelPathControls(builder.scene, builder.rayProvider);
+  const pathControls = new VoxelPathControls(
+    builder.scene,
+    builder.rayProvider
+  );
   pathControls.setPath(pathTool.path);
 
   const mountTool = () => {
     voxelSelectionHighlight.setEnabled(true);
+    pathControls.setEnabled(true);
+    pathControls.setPath(pathTool.path);
     const pointerDown = builder.createEventListener(
       "pointer-down",
       async (event) => {
@@ -77,6 +82,7 @@ export default function ({ builder }: { builder: Builder }) {
     if (onDispose) onDispose();
     voxelSelectionHighlight.setEnabled(false);
     pathControls.setEnabled(false);
+    pathControls.clear();
   };
 
   builder.addEventListener("tool-set", () => {

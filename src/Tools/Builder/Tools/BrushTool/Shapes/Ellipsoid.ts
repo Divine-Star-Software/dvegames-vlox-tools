@@ -1,39 +1,39 @@
 import { BrushToolShapes } from "../BrushToolShapes";
-import { EllipsoidVoxelTemplate } from "@divinevoxel/vlox/Templates/Shapes/EllipsoidVoxelTemplate";
+import { EllipsoidVoxelShapeSelection } from "@divinevoxel/vlox/Templates/Shapes/Selections/EllipsoidVoxelShapeSelection";
 import { SchemaEditor } from "../../../../../UI/Schemas/SchemaEditor";
 import { IntProp } from "@amodx/schemas";
 BrushToolShapes.registerShape(
   "Ellipsoid",
-  (template: EllipsoidVoxelTemplate) => {
+  (selection: EllipsoidVoxelShapeSelection) => {
     return SchemaEditor({
       properties: [
         IntProp("Radius X", {
           min: 1,
           max: 100,
-          value: template.radiusX,
+          value: selection.radiusX,
           initialize: (node) => {
             node.observers.updatedOrLoadedIn.subscribe(
-              () => (template.radiusX = node.get())
+              () => (selection.radiusX = node.get())
             );
           },
         }),
         IntProp("Radius Y", {
           min: 1,
           max: 100,
-          value: template.radiusY,
+          value: selection.radiusY,
           initialize: (node) => {
             node.observers.updatedOrLoadedIn.subscribe(
-              () => (template.radiusY = node.get())
+              () => (selection.radiusY = node.get())
             );
           },
         }),
         IntProp("Radius Z", {
           min: 1,
           max: 100,
-          value: template.radiusZ,
+          value: selection.radiusZ,
           initialize: (node) => {
             node.observers.updatedOrLoadedIn.subscribe(
-              () => (template.radiusZ = node.get())
+              () => (selection.radiusZ = node.get())
             );
           },
         }),

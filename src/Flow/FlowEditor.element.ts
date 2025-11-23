@@ -177,14 +177,12 @@ export class FlowEditorElement extends HTMLElement {
           Button("Load", {
             onClick: async () => {
               const json = await JSONFileAPI.uploadJSON();
-              console.warn("import json", json);
               this.flowGraphEditor.importGraph(json);
             },
           }),
           Button("Save", {
             onClick: async () => {
               const json = this.flowGraph.toJSON();
-              console.warn("export json", json);
               await JSONFileAPI.downloadJSON("graph.json", json);
             },
           }),

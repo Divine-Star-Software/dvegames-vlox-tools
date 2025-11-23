@@ -71,7 +71,7 @@ export default function ({ builder }: { builder: Builder }) {
   const setShape = () => {
     shapeContainer.innerHTML = "";
     shapeContainer.append(
-      BrushToolShapes.ShapeRendered[brushTool.shape](brushTool.template)
+      BrushToolShapes.ShapeRendered[brushTool.shape](brushTool.selection)
     );
   };
 
