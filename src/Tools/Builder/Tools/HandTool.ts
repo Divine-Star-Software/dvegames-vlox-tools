@@ -27,6 +27,7 @@ export default function ({ builder }: { builder: Builder }) {
       async (event) => {
         if (event.detail.button !== 0) return;
         handTool.voxelData = builder.paintData;
+        handTool.usePlacingStrategy=false;
         await handTool.use();
       }
     );
