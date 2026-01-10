@@ -16,7 +16,6 @@ import PathTool from "./Tools/PathTool";
 import WrenchTool from "./Tools/WrenchTool";
 import CollapsibleSection from "../../UI/Components/CollapsibleSection";
 import Guides from "./Guides";
-import Templates from "./Templates";
 import TemplateTool from "./Tools/TemplateTool";
 import ShapeTool from "./Tools/ShapeTool";
 elm.css(/* css */ `
@@ -95,7 +94,6 @@ export default function (graph: Graph) {
           VoxelSelect({ builder })
         )
       ),
-      Templates(graph),
       Guides(graph)
     );
   });
