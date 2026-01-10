@@ -1,6 +1,6 @@
 import { elm, frag, useRef } from "@amodx/elm";
 import { IntProp, Schema, SelectProp } from "@amodx/schemas";
-import { SchemaRegister } from "@divinevoxel/vlox/Voxels/State/SchemaRegister";
+import { VoxelSchemas } from "@divinevoxel/vlox/Voxels/State/VoxelSchemas";
 import { SchemaEditor } from "../../../UI/Schemas/SchemaEditor";
 import { VoxelIndex } from "@divinevoxel/vlox/Voxels/Indexes/VoxelIndex";
 import { VoxelTextureIndex } from "@divinevoxel/vlox/Voxels/Indexes/VoxelTextureIndex";
@@ -66,25 +66,26 @@ const schemaUpdated = new Observable();
 
 function SchemaForm(voxelId: string, builder: Builder) {
   const paintData = builder.paintData;
-  const voxelSchema = SchemaRegister.getVoxelSchemas(voxelId);
-  voxelSchema.state.startEncoding();
-  voxelSchema.mod.startEncoding();
+  const stateSchema = VoxelSchemas.getStateSchema(voxelId)!;
+  const modSchema = VoxelSchemas.mod.get(voxelId)!;
+  stateSchema.startEncoding();
+  modSchema.startEncoding();
   const updated = () => {
-    paintData.state = voxelSchema.state.getEncoded();
-    paintData.mod = voxelSchema.mod.getEncoded();
+    paintData.state = stateSchema.getEncoded();
+    paintData.mod = modSchema.getEncoded();
     schemaUpdated.notify();
   };
 
-  const shapeStateSchema = voxelSchema.state.nodes.length
+  const shapeStateSchema = stateSchema.nodes.length
     ? Schema.CreateInstance<Record<string, any>>(
-        ...voxelSchema.state.nodes.map((node) => {
+        ...stateSchema.nodes.map((node) => {
           if (!node.valuePalette) {
             return IntProp(node.name, {
               initialize(schemaNode) {
                 schemaNode.enableProxy(
-                  () => voxelSchema.state.getNumber(node.name),
+                  () => stateSchema.getNumber(node.name),
                   (value) => {
-                    voxelSchema.state.setNumber(node.name, value);
+                    stateSchema.setNumber(node.name, value);
                     updated();
                   }
                 );
@@ -95,9 +96,9 @@ function SchemaForm(voxelId: string, builder: Builder) {
             options: node.valuePalette._palette,
             initialize(schemaNode) {
               schemaNode.enableProxy(
-                () => voxelSchema.state.getValue(node.name),
+                () => stateSchema.getValue(node.name),
                 (value) => {
-                  voxelSchema.state.setValue(node.name, value);
+                  stateSchema.setValue(node.name, value);
                   updated();
                 }
               );
@@ -107,16 +108,16 @@ function SchemaForm(voxelId: string, builder: Builder) {
       )
     : null;
 
-  const voxelModSchema = voxelSchema.mod.nodes.length
+  const voxelModSchema = modSchema.nodes.length
     ? Schema.CreateInstance<Record<string, any>>(
-        ...voxelSchema.mod.nodes.map((node) => {
+        ...modSchema.nodes.map((node) => {
           if (!node.valuePalette) {
             return IntProp(node.name, {
               initialize(schemaNode) {
                 schemaNode.enableProxy(
-                  () => voxelSchema.mod.getNumber(node.name),
+                  () => modSchema.getNumber(node.name),
                   (value) => {
-                    voxelSchema.mod.setNumber(node.name, value);
+                    modSchema.setNumber(node.name, value);
                     updated();
                   }
                 );
@@ -127,9 +128,9 @@ function SchemaForm(voxelId: string, builder: Builder) {
             options: node.valuePalette._palette,
             initialize(schemaNode) {
               schemaNode.enableProxy(
-                () => voxelSchema.mod.getValue(node.name),
+                () => modSchema.getValue(node.name),
                 (value) => {
-                  voxelSchema.mod.setValue(node.name, value);
+                  modSchema.setValue(node.name, value);
                   updated();
                 }
               );
@@ -140,24 +141,24 @@ function SchemaForm(voxelId: string, builder: Builder) {
     : null;
 
   const loadIn = () => {
-    voxelSchema.state.startEncoding(paintData.state);
-    voxelSchema.mod.startEncoding(paintData.mod);
+    stateSchema.startEncoding(paintData.state);
+    modSchema.startEncoding(paintData.mod);
     if (shapeStateSchema) {
-      voxelSchema.state.nodes.forEach((node) => {
+      stateSchema.nodes.forEach((node) => {
         if (node.valuePalette) {
-          shapeStateSchema[node.name] = voxelSchema.state.getValue(node.name);
+          shapeStateSchema[node.name] = stateSchema.getValue(node.name);
           return;
         }
-        shapeStateSchema[node.name] = voxelSchema.state.getNumber(node.name);
+        shapeStateSchema[node.name] = stateSchema.getNumber(node.name);
       });
     }
     if (voxelModSchema) {
-      voxelSchema.mod.nodes.forEach((node) => {
+      modSchema.nodes.forEach((node) => {
         if (node.valuePalette) {
-          voxelModSchema[node.name] = voxelSchema.mod.getValue(node.name);
+          voxelModSchema[node.name] = modSchema.getValue(node.name);
           return;
         }
-        voxelModSchema[node.name] = voxelSchema.mod.getNumber(node.name);
+        voxelModSchema[node.name] = modSchema.getNumber(node.name);
       });
     }
   };

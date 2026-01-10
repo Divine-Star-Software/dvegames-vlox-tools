@@ -112,7 +112,6 @@ export default function ItemNode({
         display: isGroup ? "none" : " block",
       },
       onclick() {
-        console.warn("CLICKED", state, state.getPaintData());
         const paintData = state.getPaintData();
         builder.setData(paintData);
       },
