@@ -20,11 +20,15 @@ export enum BuilderToolIds {
   Wrench = "Wrench",
   Path = "Path",
   Template = "Template",
+  Debug = "Debug",
 }
 type RayModes = "camera" | "mouse";
 
 class BuilderTools {
-  constructor(public handTool: HandTool, public brushTool: BrushTool) {}
+  constructor(
+    public handTool: HandTool,
+    public brushTool: BrushTool,
+  ) {}
 }
 
 class BuilderRayEvent<Data extends any = null> {
@@ -59,7 +63,7 @@ class BuilderRay
         this.scene.pointerY,
         this.identity,
         this.ray,
-        camera
+        camera,
       );
     } else {
       this.scene.createPickingRayToRef(
@@ -67,7 +71,7 @@ class BuilderRay
         this.scene.pointerY,
         this.identity,
         this.ray,
-        camera
+        camera,
       );
     }
     const changed =
@@ -101,13 +105,16 @@ export class Builder extends TypedEventTarget<BuilderEvents> {
     PaintVoxelData.Set(this.paintData, data);
     this.dispatch("voxel-updated", this.paintData);
   }
-  constructor(public DVER: DivineVoxelEngineRender, public scene: Scene) {
+  constructor(
+    public DVER: DivineVoxelEngineRender,
+    public scene: Scene,
+  ) {
     super();
     this.rayProvider = new BuilderRay(scene);
     this.space = new VoxelBuildSpace(DVER, this.rayProvider);
     this.tools = new BuilderTools(
       new HandTool(this.space),
-      new BrushTool(this.space)
+      new BrushTool(this.space),
     );
     this.rayMode = "mouse";
     this.scene.onPointerObservable.add((event) => {

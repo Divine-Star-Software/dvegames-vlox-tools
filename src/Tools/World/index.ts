@@ -12,6 +12,8 @@ import { BinaryObject } from "@amodx/binary";
 import { Compressor } from "@amodx/core/Compression";
 import { CacheManager } from "@divinevoxel/vlox/Cache/CacheManager";
 import ImportArchivedAreaJSON from "@divinevoxel/vlox/World/Archive/Functions/JSON/ImportArchivedAreaJSON";
+import ExportArchivedAreaJSON from "@divinevoxel/vlox/World/Archive/Functions/JSON/ExportArchivedAreaJSON";
+
 import CollapsibleSection from "../../UI/Components/CollapsibleSection";
 export default function (graph: Graph) {
   ToolPanelViews.registerView("World", (component) => {
@@ -28,6 +30,14 @@ export default function (graph: Graph) {
     const { downloadFile } = useFileDownload();
     const { fileInput, uploadFile } = useFileUpload();
 
+    const settings = Schema.CreateInstance<{
+      "JSON Mode": boolean;
+    }>(
+      BooleanProp("JSON Mode", {
+        value: false,
+        initialize(node) {},
+      })
+    );
     return frag(
       CollapsibleSection(
         { title: "World Simulation", opened: true },
@@ -92,13 +102,15 @@ export default function (graph: Graph) {
               async onclick() {
                 console.warn("Archive world");
                 const archivedData = await archiver.data.archive();
-
-                //  const json = await ExportArchivedAreaJSON(archivedData);
-                //   downloadFile("archived-world.json", JSON.stringify(json));
-                const compressed = await Compressor.core.compressArrayBuffer(
-                  BinaryObject.objectToBuffer(archivedData)
-                );
-                downloadFile("archived-world.bin", compressed.buffer);
+                if (settings["JSON Mode"]) {
+                  const json = await ExportArchivedAreaJSON(archivedData);
+                  downloadFile("archived-world.json", JSON.stringify(json));
+                } else {
+                  const compressed = await Compressor.core.compressArrayBuffer(
+                    BinaryObject.objectToBuffer(archivedData)
+                  );
+                  downloadFile("archived-world.bin", compressed.buffer);
+                }
               },
             },
             "Archive World"
@@ -107,15 +119,15 @@ export default function (graph: Graph) {
             "button",
             {
               async onclick() {
-                console.log("IMPORT WORLD");
-                const jsonString = await uploadFile("string");
-                if (!jsonString) return;
-                const json = JSON.parse(jsonString);
-                console.log(json);
-                const archive = await ImportArchivedAreaJSON(json);
-                console.log(archive);
-                await archiver.data.load(archive);
-                /*      const binary = await uploadFile("binary");
+                console.warn("Import world");
+                if (settings["JSON Mode"]) {
+                  const jsonString = await uploadFile("string");
+                  if (!jsonString) return;
+                  const json = JSON.parse(jsonString);
+                  const archive = await ImportArchivedAreaJSON(json);
+                  await archiver.data.load(archive);
+                } else {
+                  const binary = await uploadFile("binary");
                   if (!binary) return;
                   BinaryObject.setUseSharedMemory(true);
                   const archive = BinaryObject.bufferToObject(
@@ -123,40 +135,15 @@ export default function (graph: Graph) {
                       .buffer as any
                   ) as any;
                   BinaryObject.setUseSharedMemory(false);
-                  await archiver.data.load(archive); */
+                  await archiver.data.load(archive);
+                }
               },
             },
             "Import World"
           ),
-          elm(
-            "button",
-            {
-              async onclick() {
-                const archivedData = CacheManager.getCachedData();
-                const compressed = await Compressor.core.compressArrayBuffer(
-                  BinaryObject.objectToBuffer(archivedData)
-                );
-                downloadFile("dve-cache.bin", compressed.buffer);
-              },
-            },
-            "Archive Cache"
-          ),
           SchemaEditor({
-            schemaInstance: Schema.CreateInstance(
-              BooleanProp("Cached Data", {
-                value: Boolean(localStorage.getItem("cached-data")),
-                initialize(node) {
-                  node.observers.updated.subscribe((node) => {
-                    const v = Boolean(node.get());
-                    v
-                      ? localStorage.setItem("cached-data", "true")
-                      : localStorage.removeItem("cached-data");
-                  });
-                },
-              })
-            ),
+            schemaInstance: settings,
           }),
-
           fileInput
         )
       )

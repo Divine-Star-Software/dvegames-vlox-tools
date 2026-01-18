@@ -18,6 +18,7 @@ import CollapsibleSection from "../../UI/Components/CollapsibleSection";
 import Guides from "./Guides";
 import TemplateTool from "./Tools/TemplateTool";
 import ShapeTool from "./Tools/ShapeTool";
+import DebugTool from "./Tools/DebugTool";
 elm.css(/* css */ `
 .builder {
   display: flex;
@@ -68,13 +69,14 @@ export default function (graph: Graph) {
                   BuilderToolIds.Path,
                   BuilderToolIds.Wrench,
                   BuilderToolIds.Template,
+                  BuilderToolIds.Debug,
                 ],
                 initialize(node) {
                   node.observers.updatedOrLoadedIn.subscribe(() =>
-                    builder.setTool(node.get())
+                    builder.setTool(node.get()),
                   );
                 },
-              })
+              }),
             ),
           }),
           elm(
@@ -87,14 +89,15 @@ export default function (graph: Graph) {
             PathTool({ builder }),
             WrenchTool({ builder }),
             ShapeTool({ builder }),
-            TemplateTool({ builder })
+            TemplateTool({ builder }),
+            DebugTool({ builder }),
           ),
           elm("hr"),
           VoxelDisplay({ builder }),
-          VoxelSelect({ builder })
-        )
+          VoxelSelect({ builder }),
+        ),
       ),
-      Guides(graph)
+      Guides(graph),
     );
   });
 }
