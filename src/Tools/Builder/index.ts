@@ -39,9 +39,6 @@ export default function (graph: Graph) {
 
   const builder = new Builder(rendererContext.data.dve, scene);
 
-  scene.registerBeforeRender(() => {
-    builder;
-  });
 
   ToolPanelViews.registerView("Build", () => {
     return frag(
