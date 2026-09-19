@@ -4,7 +4,7 @@
   "type": "module",
   "main": "./index.js",
   "types": "./index.d.ts",
-  "version": "0.0.33",
+  "version": "0.0.34",
   "scripts": {
     "clean:dist-ts": "test -d dist && find dist -type f \\( -name \"*.js\" -o -name \"*.d.ts\" \\) -delete || true",
     "build": "mkdir -p dist && npm run clean:dist-ts && cp package.json dist/package.json && cd ./src && npx tsc",
@@ -17,14 +17,14 @@
     "access": "public"
   },
   "peerDependencies": {
-    "@amodx/math": "^0.0.18",
-    "@amodx/ncs": "^0.0.27",
-    "@amodx/schemas": "^0.0.25",
-    "@amodx/core": "^0.0.25",
-    "@amodx/elm": "^0.0.26",
-    "@amodx/controls": "^0.0.39",
-    "@divinevoxel/vlox": "^0.0.85",
-    "@divinevoxel/vlox-babylon": "^0.0.64",
+    "@amodx/math": "^0.0.19",
+    "@amodx/ncs": "^0.0.28",
+    "@amodx/schemas": "^0.0.26",
+    "@amodx/core": "^0.0.26",
+    "@amodx/elm": "^0.0.27",
+    "@amodx/controls": "^0.0.40",
+    "@divinevoxel/vlox": "^0.0.86",
+    "@divinevoxel/vlox-babylon": "^0.0.65",
     "@babylonjs/core": ">=7.0.0"
   }
 }
